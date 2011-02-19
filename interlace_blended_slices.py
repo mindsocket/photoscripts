@@ -16,71 +16,76 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-from os import path
 from PIL import Image
 import os
 import sys
-import math
-import subprocess
 from multiprocessing import Pool
 
-def open(f):
-    print f,
-    return Image.open(f)
+class SliceBlender(object):
+    def __init__(self, files):
+        print "Creating alpha gradient for blending slices"
+        self.gradient = Image.new('L', (5*256,1))
+        for x in range(512):
+            self.gradient.putpixel((x, 0),x/2)
+        for x in range(256):
+            self.gradient.putpixel((x+2*256, 0),255)
+        for x in range(512):
+            self.gradient.putpixel((x+3*256, 0),255-(x/2))
 
-alphacache=dict()
-def getAlpha(gradient, size):
-    if not alphacache.has_key(size[0]):
-        alphacache[size[0]] = gradient.resize(size)
+        self.outdir="blended_slices"
+        self.files = files
+        self.image_count = len(files)
+        self.width, self.height = open(files[0]).size 
+
+    def open(self, f):
+        print f,
+        return Image.open(f)
+    
+    alphacache=dict()
+    def getAlpha(self, size):
+        if not self.alphacache.has_key(size[0]):
+            self.alphacache[size[0]] = self.gradient.resize(size)
+            
+        return self.alphacache[size[0]]
+    
+    def splice(self, r):
         
-    return alphacache[size[0]]
+        if not os.path.exists(self.outdir):
+            print "Creating directory: %s" % self.outdir
+            os.mkdir(self.outdir)
 
-def splice_func(r):
-    print "Shift index %d:" % r
-    output_image = Image.new('RGBA', (width, height))
-
-    strips = image_count
-
-    for i in range(strips):
-        print i,
-
-        offset = (r + i) % strips
-        x0 = int(float(offset - 2) / strips * width)
-        x1 = int(float(offset + 3) / strips * width)
-        box = (x0, 0, x1, height)
-        #print box,
+        print "Shift index %d:" % r
+        output_image = Image.new('RGBA', (self.width, self.height))
     
-        #im = open(files[i]).crop(box)
-        im = open(files[(strips - 1) - abs((i * 2) - (strips - 1))]).crop(box)
+        strips = self.image_count
     
-        # resize the gradient to the size of im...
-        alpha = getAlpha(gradient, im.size)
+        for i in range(strips):
+            print i,
+    
+            offset = (r + i) % strips
+            x0 = int(float(offset - 2) / strips * self.width)
+            x1 = int(float(offset + 3) / strips * self.width)
+            box = (x0, 0, x1, self.height)
+            #print box,
+        
+            #im = open(files[i]).crop(box)
+            im = open(self.files[(strips - 1) - abs((i * 2) - (strips - 1))]).crop(box)
+        
+            # resize the gradient to the size of im...
+            alpha = self.getAlpha(im.size)
+    
+            output_image.paste(im, (x0, 0), alpha)
+    
+        print "Done"
+        print "Saving...",
+        output_image.save(self.outdir + '/combined%05d.png' % r, 'PNG')
+        print "Done"
 
-        output_image.paste(im, (x0, 0), alpha)
-
-    print "Done"
-    print "Saving...",
-    output_image.save('combined%05d.png' % r, 'PNG')
-    print "Done"
-
-print "Getting file list"
-files = sorted([f for f in os.listdir(path.curdir) if os.path.splitext(f)[1] == ".tif"])
-
-print "Creating alpha gradient for blending slices"
-gradient = Image.new('L', (5*256,1))
-for x in range(512):
-    gradient.putpixel((x, 0),x/2)
-for x in range(256):
-    gradient.putpixel((x+2*256, 0),255)
-for x in range(512):
-    gradient.putpixel((x+3*256, 0),255-(x/2))
-
-
-image_count = len(files)
-
-width, height = open(files[0]).size 
 
 if __name__ == '__main__':
-    pool = Pool(processes=2)
+    print "Getting file list"
+    files = sys.argv[1:]
 
-    pool.map(splice_func, [r for r in range(image_count) if not os.path.exists('combined%05d.png' % r)])    
+    pool = Pool(processes=2)
+    sliceBlender = SliceBlender(files) 
+    pool.map(sliceBlender.splice, [r for r in range(len(files)) if not os.path.exists(sliceBlender.outdir + '/combined%05d.png' % r)])    
