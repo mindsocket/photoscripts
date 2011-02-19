@@ -1,0 +1,9 @@
+
+Various photo, video and timelapse processing scripts.
+
+Depends on python (2.7, maybe others), PIL, imagemagick, bash, hugin
+
+Copyright (C) 2011  Roger Barnes  http://roger.mindsocket.com.au
+
+
+ 
