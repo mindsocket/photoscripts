@@ -45,10 +45,11 @@ def splice_func(r):
         x0 = int(float(offset - 2) / strips * width)
         x1 = int(float(offset + 3) / strips * width)
         box = (x0, 0, x1, height)
-        #print box,
+        print box,
     
         #im = open(files[i]).crop(box)
         im = open(files[(strips - 1) - abs((i * 2) - (strips - 1))]).crop(box)
+        #im = open(files[image_count * ((strips - 1) - abs((i * 2) - (strips - 1))) / strips]).crop(box)
     
         # resize the gradient to the size of im...
         alpha = getAlpha(gradient, im.size)
@@ -69,6 +70,10 @@ for x in range(256):
 for x in range(512):
     gradient.putpixel((x+3*256, 0),255-(x/2))
 
+files = sorted([f for f in os.listdir(os.path.curdir) if os.path.splitext(f)[1] == ".tif"])
+image_count = len(files)
+
+width, height = open(files[0]).size 
 
 if __name__ == '__main__':
 

@@ -16,7 +16,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-
-mencoder "mf://*.tif" -mf type="tif":fps=24 -o timelapse_1080p.avi -ovc lavc -lavcopts vcodec=mpeg4:vpass=1:vbitrate=16000:autoaspect -vf scale=1920:1080
-mencoder "mf://*.tif" -mf type="tif":fps=24 -o timelapse_1080p.avi -ovc lavc -lavcopts vcodec=mpeg4:vpass=2:vbitrate=16000:autoaspect -vf scale=1920:1080
+type=${1:-jpg}
+mencoder "mf://*.${type}" -mf type="${type}":fps=24 -o timelapse_1080p.avi -ovc lavc -lavcopts vcodec=mpeg4:vpass=1:vbitrate=16000:autoaspect -vf scale=1920:1080
+mencoder "mf://*.${type}" -mf type="${type}":fps=24 -o timelapse_1080p.avi -ovc lavc -lavcopts vcodec=mpeg4:vpass=2:vbitrate=16000:autoaspect -vf scale=1920:1080
 
