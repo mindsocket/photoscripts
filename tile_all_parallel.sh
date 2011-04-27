@@ -33,3 +33,4 @@ while [ $IMAGE_COUNT -gt 1 ]; do
 	FINDCMD='find . -name "'$PREFIX'*" -type f'
 	IMAGE_COUNT=$(eval $FINDCMD | wc -l)
 done
+

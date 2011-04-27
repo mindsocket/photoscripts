@@ -18,8 +18,11 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 cd pano_unprocessed
-firstfile=$(ls IMG_* | head -n 1)
-autopano-sift-c ${firstfile}.pto IMG_*
+firstfile=$(ls * | head -n 1)
+autopano-sift-c ${firstfile}.pto *
+if [ $? != 0 ]; then
+	exit 1
+fi
 #autooptimiser ${firstfile}.pto -o ${firstfile}.pto
 cd -
 mkdir -p pano_processed

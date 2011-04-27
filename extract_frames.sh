@@ -16,5 +16,5 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 mkdir $1_frames
-ffmpeg -i $1 $1_frames/frame%5d.jpg
+ffmpeg -i $1 $1_frames/frame%5d.tif
 

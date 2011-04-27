@@ -17,7 +17,12 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
+sliceparam=${1}x99999
+if [ "x$2" == "xhoriz" ]; then
+	sliceparam=99999x${1}
+fi
+
 mkdir -p slice_$1
 FINDCMD='find . -maxdepth 1 -name "*.tif" -or -name "*.jpg"'
-eval $FINDCMD | xargs --verbose -n 1 -P 8 -Ixxx convert xxx -gravity Center -crop ${1}x99999+0+0 slice_$1/xxx.tif
+eval $FINDCMD | xargs --verbose -n 1 -P 8 -Ixxx convert xxx -gravity Center -crop ${sliceparam}+0+0 slice_$1/xxx.tif
 

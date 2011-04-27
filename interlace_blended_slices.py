@@ -21,16 +21,26 @@ import os
 from multiprocessing import Pool
 import sys
 
-def open(f):
+def openImage(f):
     print f,
     return Image.open(f)
 
-alphacache=dict()
-def getAlpha(gradient, size):
-    if not alphacache.has_key(size[0]):
-        alphacache[size[0]] = gradient.resize(size)
-        
-    return alphacache[size[0]]
+class memoize:
+    # from http://avinashv.net/2008/04/python-decorators-syntactic-sugar/
+    def __init__(self, function):
+        self.function = function
+        self.memoized = {}
+
+    def __call__(self, *args):
+        try:
+            return self.memoized[args]
+        except KeyError:
+            self.memoized[args] = self.function(*args)
+            return self.memoized[args]
+
+@memoize
+def getAlpha(size):
+    return gradient.resize(size)
 
 def splice_func(r):
     print "Shift index %d:" % r
@@ -47,12 +57,12 @@ def splice_func(r):
         box = (x0, 0, x1, height)
         print box,
     
-        #im = open(files[i]).crop(box)
-        im = open(files[(strips - 1) - abs((i * 2) - (strips - 1))]).crop(box)
-        #im = open(files[image_count * ((strips - 1) - abs((i * 2) - (strips - 1))) / strips]).crop(box)
+        #im = openImage(files[i]).crop(box)
+        im = openImage(files[(strips - 1) - abs((i * 2) - (strips - 1))]).crop(box)
+        #im = openImage(files[image_count * ((strips - 1) - abs((i * 2) - (strips - 1))) / strips]).crop(box)
     
         # resize the gradient to the size of im...
-        alpha = getAlpha(gradient, im.size)
+        alpha = getAlpha(im.size)
 
         output_image.paste(im, (x0, 0), alpha)
 
@@ -73,14 +83,14 @@ for x in range(512):
 files = sorted([f for f in os.listdir(os.path.curdir) if os.path.splitext(f)[1] == ".tif"])
 image_count = len(files)
 
-width, height = open(files[0]).size 
+width, height = openImage(files[0]).size 
 
 if __name__ == '__main__':
 
     files = sys.argv[1:]
     image_count = len(files)
     
-    width, height = open(files[0]).size 
+    width, height = openImage(files[0]).size 
 
     pool = Pool(processes=2)
     pool.map(splice_func, [r for r in range(image_count) if not os.path.exists('blended_slices/combined%05d.png' % r)])    

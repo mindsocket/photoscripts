@@ -36,7 +36,7 @@ class exposureSmoother(object):
         
         # Use the pickled stats to avoid reparsing the images
         # Delete statsPickle to recreate
-        statsPickle = files[0] + "-" + len(files) + ".pickle"
+        statsPickle = files[0] + "-" + str(len(files)) + ".pickle"
         if os.path.exists(statsPickle):
             print "Unpickling " + statsPickle
             stats = cPickle.load(open(statsPickle, 'r'))
@@ -88,12 +88,12 @@ if __name__ == '__main__':
     
     smoother = exposureSmoother(files)
 
-    print "median:", exposureSmoother.median
-    print "smoothMedian:", exposureSmoother.smoothMedian
-    print "ratioMedian:", exposureSmoother.ratioMedian
+    print "median:", smoother.median
+    print "smoothMedian:", smoother.smoothMedian
+    print "ratioMedian:", smoother.ratioMedian
 
     #plot(exposureSmoother.median)
     #plot(exposureSmoother.smoothMedian)
 
-    exposureSmoother.smoothFiles("mediansmoothed")
+    smoother.smoothFiles("mediansmoothed")
 
