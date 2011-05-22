@@ -20,11 +20,11 @@
 for i in hdr_unprocessed_*; do
   cd $i
   firstfile=$(ls IMG_* | head -n 1)
-  align_image_stack -p ${firstfile}.pto -a aligned_${firstfile} IMG_*
-  enfuse -o enfused_${firstfile}.tif aligned_${firstfile}*
-  cd ..
-  mkdir -p hdr_processed
-  mv $i/* hdr_processed/
+  align_image_stack -p ${firstfile}.pto -a aligned_${firstfile} IMG_* && \
+  enfuse -o enfused_${firstfile}.tif aligned_${firstfile}* && \
+  cd .. && \
+  mkdir -p hdr_processed && \
+  mv $i/* hdr_processed/ && \
   rmdir $i
 done
 
