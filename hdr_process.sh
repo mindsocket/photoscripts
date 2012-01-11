@@ -17,14 +17,23 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-for i in hdr_unprocessed_*; do
-  cd $i
-  firstfile=$(ls IMG_* | head -n 1)
-  align_image_stack -p ${firstfile}.pto -a aligned_${firstfile} IMG_* && \
-  enfuse -o enfused_${firstfile}.tif aligned_${firstfile}* && \
-  cd .. && \
-  mkdir -p hdr_processed && \
-  mv $i/* hdr_processed/ && \
-  rmdir $i
-done
+function hdr_process() {
+  firstfile=$(basename $1)
+  echo "Creating enfused_${firstfile}.tif..."
+  align_image_stack -p ${firstfile}.pto -a aligned_${firstfile} $* && \
+  enfuse -m 2048 -o enfused_${firstfile}.tif aligned_${firstfile}* 
+}
 
+if [[ $# -gt 0 ]]; then
+  hdr_process $*
+else
+  for i in hdr_unprocessed_*; do
+    echo "Processing $i directory..."
+    cd $i
+    hdr_process IMG_* && \
+    cd .. && \
+    mkdir -p hdr_processed && \
+    mv $i/* hdr_processed/ && \
+    rmdir $i
+  done
+fi
